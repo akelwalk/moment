@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moment</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="index.js" defer></script>
+</head>
+<body>
+
+  <!-- sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Moment</h2>
+      <button class="toggle-btn" id="toggleBtn">☰</button>
+    </div>
+    <button onclick="navigate('index.html')">Home</button>
+    <button onclick="navigate('new-entry.html')">Create New Entry</button>
+    <button onclick="navigate('view-entries.html')">View Past Entries</button>
+  </div>
+
+  <!-- main content -->
+  <div class="main-content" id="mainContent">
+    <h1>Dashboard</h1>
+
+    <!-- bar chart -->
+    <div class="chart-container">
+      <h2>View Past Activity</h2>
+      <canvas id="journalChart"></canvas>
+    </div>
+
+    <!-- prompt of the day -->
+    <div class="daily-prompt">
+      <h2>Prompt of the Day</h2>
+      <p>Describe one moment today that made you feel truly grateful.</p>
+      <button onclick="navigate('new-entry.html')">Get Started</button>
+    </div>
+  </div>
+
+</body>
+</html>

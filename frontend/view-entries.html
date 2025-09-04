@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Entries</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="view-entries.js" defer></script>
+</head>
+<body>
+
+  <!-- sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Moment</h2>
+      <button class="toggle-btn" id="toggleBtn">☰</button>
+    </div>
+    <button onclick="navigate('index.html')">Home</button>
+    <button onclick="navigate('new-entry.html')">Create New Entry</button>
+    <button onclick="navigate('view-entries.html')">View Past Entries</button>
+  </div>
+
+  <!-- main content -->
+  <div class="main-content">
+    <h1>Search Entries</h1>
+
+    <!-- search bar -->
+    <div class="search-bar-section">
+      <div class="search-bar-group">
+        <input type="text" id="searchInput" placeholder="Search your journal entries." />
+        <button id="searchBtn">Search</button>
+      </div>
+    </div>
+
+    <!-- entries table -->
+    <div class="entries-container">
+      <table class="entries-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Prompt</th>
+            <th>Sentiment</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="entriesTableBody">
+          <!-- dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- popup for viewing/editing entry -->
+  <div class="popup-overlay" id="entryPopupOverlay">
+    <div class="popup-card">
+      <h2>View/Edit Journal Entry</h2>
+
+      <label>Title
+        <input type="text" id="popupTitle" maxlength="100">
+      </label>
+
+      <label>Prompt
+        <textarea id="popupPrompt" rows="3" maxlength="1000"></textarea>
+      </label>
+
+      <label>Content
+        <textarea id="popupContent" rows="8" maxlength="5000"></textarea>
+      </label>
+
+      <label>Sentiment
+        <input type="text" id="popupSentiment" maxlength="100">
+      </label>
+
+      <div class="popup-buttons">
+        <button id="popupCloseBtn">Close</button>
+        <button id="popupSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

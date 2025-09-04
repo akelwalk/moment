@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Journal Entry</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="new-entry.js" defer></script>
+</head>
+<body>
+
+  <!-- sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Moment</h2>
+      <button class="toggle-btn" id="toggleBtn">☰</button>
+    </div>
+    <button onclick="navigate('index.html')">Home</button>
+    <button onclick="navigate('new-entry.html')">Create New Entry</button>
+    <button onclick="navigate('view-entries.html')">View Past Entries</button>
+  </div>
+
+  <!-- main content -->
+  <div class="main-content">
+    <h1>New Journal Entry</h1>
+
+    <!-- prompt section -->
+    <div class="prompt-section">
+      <h2>Prompt</h2>
+      <div class="prompt-input-group">
+        <input type="text" id="promptInput" placeholder="Enter your prompt here." />
+        <button id="generateBtn">Generate</button>
+      </div>
+    </div>
+
+    <!-- title section -->
+    <div class="title-section">
+      <h2>Title</h2>
+      <input type="text" id="entryTitle" placeholder="Enter the title of your journal entry" />
+    </div>
+
+    <!-- journal entry section -->
+    <div class="entry-section">
+      <h2>Journal Entry</h2>
+      <textarea id="journalEntry" rows="15" maxlength="5000" placeholder="Write your journal entry here."></textarea>
+      <div class="character-count" id="characterCount">0 / 5000</div>
+    </div>
+  </div>
+
+  <!-- generate prompt popup card -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-card">
+      <h2>Generate Journaling Prompt with AI</h2>
+
+      <label>Options:
+        <select id="generatingOptionsDropdown">
+          <option>Generate Random Prompt</option>
+          <option>Generate from Idea</option>
+          <option>Generate from Previous Entry</option>
+        </select>
+      </label>
+
+      <div id="ideaInputContainer" style="display: none;">
+      <label>Write Prompt Idea
+        <textarea id="ideaInput" placeholder="Generate a journaling prompt that involves self-reflection" maxlength="1000" rows="4" style="width: 100%; resize: none;"></textarea>
+      </label>
+      </div>
+
+      <div id="prevEntriesContainer" style="display: none;">
+        <label>Choose Previous Entry:
+        <!-- dynamically populated scroll list with previous entries -->
+        <select id="prevEntriesList" size="5" class="scroll-list">
+        </select>
+        </label>
+      </div>
+
+      <div class="popup-buttons">
+        <button id="closeBtn">Close</button>
+        <button id="doneBtn">Generate</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
