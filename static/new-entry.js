@@ -1,8 +1,3 @@
-/* new-entry.js (merged & cleaned) */
-
-// -----------------------------
-// Basic DOM refs (safe checks)
-// -----------------------------
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggleBtn');
 const journalEntry = document.getElementById('journalEntry');
@@ -21,9 +16,7 @@ const promptInput = document.getElementById('promptInput');
 const entryTitle = document.getElementById('entryTitle');
 const saveEntryBtn = document.getElementById('saveEntryBtn');
 
-// -----------------------------
-// Small helpers & state
-// -----------------------------
+
 let prevEntries = []; // will hold entry objects fetched from backend
 let isLoadingPrompt = false; 
 
@@ -43,9 +36,7 @@ function populateOptionsFromEntries(selectElement, entriesArray) {
   });
 }
 
-// -----------------------------
-// Sidebar + character count
-// -----------------------------
+// sidebar and character count
 if (toggleBtn && sidebar) {
   toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
 }
@@ -58,9 +49,7 @@ if (journalEntry && characterCount) {
   });
 }
 
-// -----------------------------
-// Save button state + save action
-// -----------------------------
+// save button state and save action
 function updateSaveButtonState() {
   // defensively check DOM elements
   const hasPrompt = promptInput && promptInput.value.trim() !== "";
@@ -106,12 +95,10 @@ async function saveEntry() {
   }
 }
 
-// expose saveEntry globally if your button uses inline onclick="saveEntry()"
+// expose saveEntry globally
 window.saveEntry = saveEntry;
 
-// -----------------------------
-// Popup & Generate Prompt Logic
-// -----------------------------
+// popup prompt
 if (generateBtn && popupOverlay && closeBtn && doneBtn) {
   generateBtn.addEventListener('click', async () => {
     popupOverlay.style.display = 'flex';
@@ -178,7 +165,7 @@ if (generateBtn && popupOverlay && closeBtn && doneBtn) {
   if (ideaInput) ideaInput.addEventListener('input', updateDoneButtonState);
   if (prevEntriesList) prevEntriesList.addEventListener('change', updateDoneButtonState);
 
-  // Generate prompt on click
+  // generate prompt on click
   doneBtn.addEventListener('click', async () => {
     const option = optionsDropdown?.value || "";
     let payload = { entry: "" };
@@ -226,7 +213,5 @@ if (generateBtn && popupOverlay && closeBtn && doneBtn) {
   });
 }
 
-// -----------------------------
-// Initial state setup
-// -----------------------------
+// initial setup state
 updateSaveButtonState();
