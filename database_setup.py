@@ -1,17 +1,19 @@
-import sqlite3
-import sqlite_vec
 from database_manager import DatabaseManager
 from embeddings import Embeddings
-import json5
 
 dbm = DatabaseManager("moment.db")
 embedding = Embeddings()
 dbm.open()
 
 # creating journal entries table scheme
-entriesTable = """CREATE VIRTUAL TABLE IF NOT EXISTS entries USING
-vec0(entry_id INTEGER PRIMARY KEY AUTOINCREMENT, prompt TEXT, title TEXT, content TEXT, date_posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP, sentiments TEXT, content_embedding float[384])"""
+entriesTable = """CREATE TABLE IF NOT EXISTS
+entries(entry_id INTEGER PRIMARY KEY AUTOINCREMENT, prompt TEXT, title TEXT, content TEXT, date_posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP, sentiments TEXT)"""
+
+embeddingsTable = """CREATE VIRTUAL TABLE IF NOT EXISTS embeddings 
+USING vec0(entry_id INTEGER PRIMARY KEY, content_embedding float[384])"""
+
 dbm.run_query(entriesTable)
+dbm.run_query(embeddingsTable)
 
 entries = [
     {
@@ -99,18 +101,31 @@ entries = [
 # insert each entry into the database
 for entry in entries:
     content = entry["content"]
-    sentiments = embedding.get_emotions(content)
-    sentiments_string = json5.dumps(sentiments)
-    content_embedding = embedding.get_vector_embedding(content)
+    sentiments = embedding.get_emotions(content) # returns a json string
+    content_embedding = embedding.get_vector_embedding(content) # returns a binary blob
 
     dbm.cursor.execute(
-        """INSERT INTO entries (prompt, title, content, date_posted, sentiments, content_embedding) VALUES (?, ?, ?, ?, ?, ?)""",
-        (entry["prompt"], entry["title"], content, entry["date_posted"], sentiments_string, content_embedding)
+        """INSERT INTO entries (prompt, title, content, date_posted, sentiments) VALUES (?, ?, ?, ?, ?)""",
+        (entry["prompt"], entry["title"], content, entry["date_posted"], sentiments)
+    )
+    entry_id = dbm.cursor.lastrowid # getting the primary key of the row we just inserted
+    dbm.cursor.execute(
+        """INSERT INTO embeddings (entry_id, content_embedding) VALUES (?, ?)""",
+        (entry_id, content_embedding)
     )
 
-test_query = """SELECT * FROM entries LIMIT 1 OFFSET 5"""
-print(dbm.run_query(test_query))
+# test_query = """SELECT * FROM entries LIMIT 1 OFFSET 5"""
+# result = dbm.run_query(test_query)[0]
+# print(result["entry_id"])
+# print(result["prompt"])
+# print(result["title"])
+# print(result["content"])
+# print(result["sentiments"])
 
-# also want to test out a embedding query thing
+# testing out a embedding query thing
+# query_embedding = embedding.get_vector_embedding("revisting through old moments")
+# query = """SELECT entry_id, vec_distance_cosine(content_embedding, ?) AS score FROM embeddings ORDER BY score ASC LIMIT 5"""
+# result = dbm.cursor.execute(query, (query_embedding,)).fetchall()
+# print(result[0]["entry_id"])
 
 dbm.close()
