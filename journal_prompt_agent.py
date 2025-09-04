@@ -30,10 +30,10 @@ class JournalPromptAgent(Agent):
 
     prompt = f"""You are an empathetic and knowledgeable reflection companion who is well versed in creating journal prompts for individuals to reflect deeply, navigate inner turmoil, and build resilience to overcome difficult situations, drawing inspiration from approaches such as cognitive behavioral therapy. 
     Given the text of a previous journal entry, create 1 relevant journal prompt that gently encourages the user to delve further into the topics the user had discussed in the entry.
-    If there is no journal entry or user request for a specific prompt in the input, come up with a general journaling prompt.
-    Be professional, kind, and creative. Make sure to not encourage destructive behaviors. If the content is highly sensitive or indicates harm, respond with safe, general reflective prompts that focus on support.
+    If there is no journal entry or user request for a specific prompt in the input, come up with a single general journaling prompt.
+    Be professional, kind, and creative. Make sure to not encourage destructive behaviors. If the content is highly sensitive or indicates harm, respond with a safe, general reflective prompt that focus on support.
     Input Format: {input_format}
-    Output Format: {output_format} 
+    Output Format: {output_format} Make sure to only create a single prompt!
     {format_warning}
 
     Here are some examples of expected inputs and outputs. These are just examples; try to make the actual journaling prompts different.
@@ -49,21 +49,36 @@ class JournalPromptAgent(Agent):
         super().__init__(model, tools, self.prompt)
 
     def run(self, inputData):
+        if not self.validate_input(inputData): # input validation step
+            print("Invalid input!")
+            inputData = json5.dumps({"entry": ""})  # force safe default if input is invalid
+
         self.product_idea = inputData
         result = super().run(inputData)
         return result
+    
+    def validate_input(self, inputData):
+        if isinstance(inputData, str): # parsing json string into a dictionary
+            try:
+                inputData = json5.loads(inputData)  # json5 allows trailing commas etc.
+            except Exception:
+                return False  # invalid JSON
 
-# model = ChatOllama(model="phi4-mini", temperature=1)
-# journal_prompt_agent = JournalPromptAgent(model, tools=[])
-# result = journal_prompt_agent.run("""entry: """")
-# print(journal_prompt_agent.last_message) #last message's content
-# print("_____________________________________________________________________________")
-# if journal_prompt_agent.last_message != "" and "Error" not in journal_prompt_agent.last_message: # last message could be empty or contain an error
-#     dictionary = json5.loads(journal_prompt_agent.last_message)
-#     print(dictionary)
-#     prompts = dictionary["prompt"]
-#     for i in range(len(prompts)):
-#         prompts[i] = prompts[i].strip("'")
-# else:
-#     print(f"prompt agent's last message (could be empty): {journal_prompt_agent.last_message}")
+        if not isinstance(inputData, dict): # making sure the data type is a dictionary
+            return False
+
+        entry = inputData.get("entry") # making sure that the key entry is in the dictionary
+        if not isinstance(entry, str):
+            return False
+
+        if len(entry) > 5000:  # prevent extremely long input - 5000 is the max characters that can be entered in a journal entry
+            return False
+        
+        # prevent obvious injection patterns
+        suspicious_patterns = ["import ", "exec(", "os.", "sys.", "open(", "<script>", "--", ";", "DROP ", "DELETE ", "INSERT ", "UPDATE ", "SELECT ", "UNION ", "' OR '1'='1", '" OR "1="1', "`"]
+        if any(pat in entry for pat in suspicious_patterns):
+            return False
+
+        return True
+
 

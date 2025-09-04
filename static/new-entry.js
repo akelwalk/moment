@@ -1,182 +1,232 @@
-// toggling sidebar
+/* new-entry.js (merged & cleaned) */
+
+// -----------------------------
+// Basic DOM refs (safe checks)
+// -----------------------------
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggleBtn');
-
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-  });
-}
-
-// navigating between pages
-function navigate(pageName) {
-  window.location.href = pageName;
-}
-
-// updating character count in journal entry
 const journalEntry = document.getElementById('journalEntry');
 const characterCount = document.getElementById('characterCount');
 
-if (journalEntry) {
-  journalEntry.addEventListener('input', () => {
-    const length = journalEntry.value.length;
-    characterCount.textContent = `${length} / 5000`;
-  });
-}
-
-// displaying and handling the generate journal prompt popup card
 const generateBtn = document.getElementById('generateBtn');
 const popupOverlay = document.getElementById('popupOverlay');
 const closeBtn = document.getElementById('closeBtn');
 const doneBtn = document.getElementById('doneBtn');
-
-generateBtn.addEventListener('click', () => {
-  popupOverlay.style.display = 'flex';
-  updateDoneButtonState(); // initializing the state of generate button inside popup card
-});
-
-// close butt functionality
-closeBtn.addEventListener('click', () => {
-  popupOverlay.style.display = 'none';
-});
-
-// close popup when clicking outside of popup-card
-popupOverlay.addEventListener("click", (e) => {
-  if (e.target === popupOverlay) {
-    popupOverlay.style.display = "none";
-  }
-});
-
-doneBtn.addEventListener('click', () => {
-  popupOverlay.style.display = 'none';
-  // For now, no additional functionality
-});
-
-// add previous journal entry titles to previous entries dropdown
-const prevEntriesList = document.getElementById('prevEntriesList');
-
-// example list of titles (placeholder for backend data)
-const titles = [
-  "yahooo",
-  "Entry 2",
-  "Entry 3",
-  "Entry 4",
-  "lmaooo",
-  "Entry 6",
-  "Entry 7",
-  "Entry 8",
-  "Entry 9",
-  "Entry 10"
-];
-
-function populateOptions(selectElement, options) {
-  selectElement.innerHTML = ""; // clearing old options
-  options.forEach(item => {
-    const option = document.createElement("option");
-    option.textContent = item;
-    option.value = item;
-    selectElement.appendChild(option);
-  });
-}
-
-if (prevEntriesList) {
-  populateOptions(prevEntriesList, titles);
-}
-
-
-// handling options for the popup dropdown
 const optionsDropdown = document.getElementById('generatingOptionsDropdown');
 const prevEntriesContainer = document.getElementById('prevEntriesContainer');
 const ideaInputContainer = document.getElementById('ideaInputContainer');
-
-optionsDropdown.addEventListener('change', () => {
-  if (optionsDropdown.value === "Generate from Previous Entry") {
-    prevEntriesContainer.style.display = "block";
-    ideaInputContainer.style.display = "none";
-
-  } else if (optionsDropdown.value === "Generate from Idea") {
-    ideaInputContainer.style.display = "block";
-    prevEntriesContainer.style.display = "none";
-
-  } else {
-    // "Generate Random Prompt"
-    prevEntriesContainer.style.display = "none";
-    ideaInputContainer.style.display = "none";
-  }
-
-  updateDoneButtonState();
-});
-
-
-// enable/disable logic for generate button
 const ideaInput = document.getElementById('ideaInput');
-
-function updateDoneButtonState() {
-  const selectedOption = optionsDropdown.value;
-
-  if (selectedOption === "Generate from Idea") {
-    doneBtn.disabled = ideaInput.value.trim() === "";
-
-  } else if (selectedOption === "Generate from Previous Entry") {
-    doneBtn.disabled = !prevEntriesList.value;
-
-  } else {
-    // Generate Random Prompt
-    doneBtn.disabled = false;
-  }
-}
-
-// event listeners for input changes
-ideaInput.addEventListener('input', updateDoneButtonState);
-prevEntriesList.addEventListener('change', updateDoneButtonState);
-
-// save entry button enable/disable logic
+const prevEntriesList = document.getElementById('prevEntriesList');
 const promptInput = document.getElementById('promptInput');
 const entryTitle = document.getElementById('entryTitle');
 const saveEntryBtn = document.getElementById('saveEntryBtn');
 
-function updateSaveButtonState() {
-  const hasPrompt = promptInput.value.trim() !== "";
-  const hasTitle = entryTitle.value.trim() !== "";
-  const hasEntry = journalEntry.value.trim() !== "";
+// -----------------------------
+// Small helpers & state
+// -----------------------------
+let prevEntries = []; // will hold entry objects fetched from backend
+let isLoadingPrompt = false; 
 
-  saveEntryBtn.disabled = !(hasPrompt && hasTitle && hasEntry);
+function navigate(pageName) {
+  window.location.href = pageName;
 }
 
-// event listeners for input changes 
-[promptInput, entryTitle, journalEntry].forEach(el =>
-  el.addEventListener('input', updateSaveButtonState)
-);
+// populate a <select> with entries (option.value = entry_id, option.text = title)
+function populateOptionsFromEntries(selectElement, entriesArray) {
+  if (!selectElement) return;
+  selectElement.innerHTML = "";
+  entriesArray.forEach(ent => {
+    const opt = document.createElement('option');
+    opt.textContent = ent.title;
+    opt.value = String(ent.entry_id); // use id for stable identification
+    selectElement.appendChild(opt);
+  });
+}
 
-// saving entry to backend
-function saveEntry() {
+// -----------------------------
+// Sidebar + character count
+// -----------------------------
+if (toggleBtn && sidebar) {
+  toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+}
+
+if (journalEntry && characterCount) {
+  journalEntry.addEventListener('input', () => {
+    const length = journalEntry.value.length;
+    characterCount.textContent = `${length} / 5000`;
+    updateSaveButtonState(); // keep save button state in sync while typing
+  });
+}
+
+// -----------------------------
+// Save button state + save action
+// -----------------------------
+function updateSaveButtonState() {
+  // defensively check DOM elements
+  const hasPrompt = promptInput && promptInput.value.trim() !== "";
+  const hasTitle = entryTitle && entryTitle.value.trim() !== "";
+  const hasEntry = journalEntry && journalEntry.value.trim() !== "";
+
+  if (saveEntryBtn) saveEntryBtn.disabled = !(hasPrompt && hasTitle && hasEntry);
+}
+
+if (promptInput) promptInput.addEventListener('input', updateSaveButtonState);
+if (entryTitle) entryTitle.addEventListener('input', updateSaveButtonState);
+
+async function saveEntry() {
+  if (!saveEntryBtn) return;
   saveEntryBtn.disabled = true;
-  
+
   const data = {
-    prompt: promptInput.value,
-    title: entryTitle.value,
-    content: journalEntry.value
+    prompt: promptInput?.value || "",
+    title: entryTitle?.value || "",
+    content: journalEntry?.value || ""
   };
 
-  fetch("/save_entry", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  })
-    .then(response => response.json())
-    .then(result => {
-      console.log("Server response:", result);
-      // clearing the fields
-      document.getElementById("promptInput").value = "";
-      document.getElementById("entryTitle").value = "";
-      document.getElementById("journalEntry").value = "";
-    })
-    .catch(error => {
-      console.error("Error saving entry:", error);
-    })
-    .finally(() => {
-      updateSaveButtonState(); // enabling button after fetch finished
+  try {
+    const resp = await fetch("/save_entry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
     });
+    const payload = await resp.json();
+    console.log("Saved:", payload);
+
+    // clear inputs
+    if (promptInput) promptInput.value = "";
+    if (entryTitle) entryTitle.value = "";
+    if (journalEntry) journalEntry.value = "";
+    updateSaveButtonState();
+  } catch (err) {
+    console.error("Error saving entry:", err);
+    updateSaveButtonState();
+  } finally {
+    // ensure the button state is recalculated
+    updateSaveButtonState();
+  }
 }
+
+// expose saveEntry globally if your button uses inline onclick="saveEntry()"
+window.saveEntry = saveEntry;
+
+// -----------------------------
+// Popup & Generate Prompt Logic
+// -----------------------------
+if (generateBtn && popupOverlay && closeBtn && doneBtn) {
+  generateBtn.addEventListener('click', async () => {
+    popupOverlay.style.display = 'flex';
+    updateDoneButtonState();
+
+    // fetch previous entries only once
+    if (prevEntries.length === 0 && prevEntriesList) {
+      try {
+        const response = await fetch("/display_entries");
+        const data = await response.json();
+        if (data && data.status === 200 && Array.isArray(data.entries)) {
+          prevEntries = data.entries;
+          populateOptionsFromEntries(prevEntriesList, prevEntries);
+        } else {
+          console.warn("Display entries returned unexpected payload:", data);
+        }
+      } catch (err) {
+        console.error("Error fetching previous entries:", err);
+      }
+    }
+  });
+
+  // close popup
+  closeBtn.addEventListener('click', () => {
+    if (!isLoadingPrompt) popupOverlay.style.display = 'none';
+  });
+
+  // close popup when clicking outside card
+  popupOverlay.addEventListener('click', (e) => {
+    if (!isLoadingPrompt && e.target === popupOverlay) popupOverlay.style.display = 'none';
+  });
+
+  // handle dropdown option change
+  if (optionsDropdown) {
+    optionsDropdown.addEventListener('change', () => {
+      if (optionsDropdown.value === "Generate from Previous Entry") {
+        if (prevEntriesContainer) prevEntriesContainer.style.display = "block";
+        if (ideaInputContainer) ideaInputContainer.style.display = "none";
+      } else if (optionsDropdown.value === "Generate from Idea") {
+        if (ideaInputContainer) ideaInputContainer.style.display = "block";
+        if (prevEntriesContainer) prevEntriesContainer.style.display = "none";
+      } else {
+        if (prevEntriesContainer) prevEntriesContainer.style.display = "none";
+        if (ideaInputContainer) ideaInputContainer.style.display = "none";
+      }
+      updateDoneButtonState();
+    });
+  }
+
+  // enable/disable generate button logic
+  function updateDoneButtonState() {
+    if (!doneBtn) return;
+    const option = optionsDropdown?.value || "";
+
+    if (option === "Generate from Idea") {
+      doneBtn.disabled = !(ideaInput && ideaInput.value.trim() !== "");
+    } else if (option === "Generate from Previous Entry") {
+      doneBtn.disabled = !(prevEntriesList && prevEntriesList.value);
+    } else {
+      doneBtn.disabled = false; // generate random prompt
+    }
+  }
+
+  if (ideaInput) ideaInput.addEventListener('input', updateDoneButtonState);
+  if (prevEntriesList) prevEntriesList.addEventListener('change', updateDoneButtonState);
+
+  // Generate prompt on click
+  doneBtn.addEventListener('click', async () => {
+    const option = optionsDropdown?.value || "";
+    let payload = { entry: "" };
+
+    if (option === "Generate from Previous Entry") {
+      const selectedId = prevEntriesList?.value;
+      const entryObj = prevEntries.find(e => String(e.entry_id) === String(selectedId));
+      payload.entry = entryObj ? (entryObj.content || "") : "";
+    } else if (option === "Generate from Idea") {
+      payload.entry = ideaInput?.value.trim() || "";
+    } else {
+      payload.entry = ""; // random
+    }
+
+    // disable button and show loading
+    doneBtn.disabled = true;
+    const previousText = doneBtn.textContent;
+    doneBtn.textContent = "Loading...";
+    isLoadingPrompt = true;
+
+    try {
+      const response = await fetch("/generate_prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (data && data.status === 200 && data.prompt) {
+        // set the main prompt input in the new-entry page
+        if (promptInput) promptInput.value = data.prompt;
+      } else {
+        console.error("Failed to generate prompt:", data);
+      }
+    } catch (err) {
+      console.error("Error generating prompt:", err);
+    } finally {
+      // restore state
+      doneBtn.disabled = false;
+      doneBtn.textContent = previousText || "Generate";
+      isLoadingPrompt = false;
+      if (popupOverlay) popupOverlay.style.display = 'none';
+      updateSaveButtonState(); // re-evaluate save button state with new prompt
+    }
+  });
+}
+
+// -----------------------------
+// Initial state setup
+// -----------------------------
+updateSaveButtonState();

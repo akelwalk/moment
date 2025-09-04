@@ -23,21 +23,16 @@ class DatabaseManager():
         self.connection.commit() # saving any modified data to the database
         self.connection.close()
     
-    def insert(self, prompt, title, content, sentiment, content_embedding, date_posted): # date_posted is specified
-        query = """INSERT INTO entries (prompt, title, content, date_posted, sentiment) VALUES (?, ?, ?, ?, ?)"""
-        self.run_query(query=query, parameters=(prompt, title, content, date_posted, sentiment))
+    def insert(self, prompt, title, content, sentiment, content_embedding, date_posted=None):
+        if date_posted is not None:
+            query = """INSERT INTO entries (prompt, title, content, date_posted, sentiment) VALUES (?, ?, ?, ?, ?)"""
+            self.run_query(query=query, parameters=(prompt, title, content, date_posted, sentiment))
+        else:
+            query = """INSERT INTO entries (prompt, title, content, sentiment) VALUES (?, ?, ?, ?)"""
+            self.run_query(query=query, parameters=(prompt, title, content, sentiment))
 
-        entry_id = self.cursor.lastrowid # getting the primary key of the row we just inserted
-        
-        query = """INSERT INTO embeddings (entry_id, content_embedding) VALUES (?, ?)"""
-        self.run_query(query=query, parameters=(entry_id, content_embedding))
-    
-    def insert(self, prompt, title, content, sentiment, content_embedding):
-        query = """INSERT INTO entries (prompt, title, content, sentiment) VALUES (?, ?, ?, ?)"""
-        self.run_query(query=query, parameters=(prompt, title, content, sentiment))
-        
-        entry_id = self.cursor.lastrowid # getting the primary key of the row we just inserted
-        
+        entry_id = self.cursor.lastrowid  # getting the primary key of the row we just inserted
+
         query = """INSERT INTO embeddings (entry_id, content_embedding) VALUES (?, ?)"""
         self.run_query(query=query, parameters=(entry_id, content_embedding))
 
@@ -52,12 +47,10 @@ class DatabaseManager():
         self.run_query("""DELETE FROM entries WHERE entry_id = ?""", (entry_id,))
         self.run_query("""DELETE FROM embeddings WHERE entry_id = ?""", (entry_id,))
 
-    def run_query(self, query):
-        self.cursor.execute(query)
-        result = self.cursor.fetchall()
-        return result
-    
-    def run_query(self, query, parameters):
-        self.cursor.execute(query, parameters)
+    def run_query(self, query, parameters=None):
+        if parameters is not None:
+            self.cursor.execute(query, parameters)
+        else:
+            self.cursor.execute(query)
         result = self.cursor.fetchall()
         return result
