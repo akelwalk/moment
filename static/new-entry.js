@@ -35,15 +35,22 @@ generateBtn.addEventListener('click', () => {
   updateDoneButtonState(); // initializing the state of generate button inside popup card
 });
 
+// close butt functionality
 closeBtn.addEventListener('click', () => {
   popupOverlay.style.display = 'none';
+});
+
+// close popup when clicking outside of popup-card
+popupOverlay.addEventListener("click", (e) => {
+  if (e.target === popupOverlay) {
+    popupOverlay.style.display = "none";
+  }
 });
 
 doneBtn.addEventListener('click', () => {
   popupOverlay.style.display = 'none';
   // For now, no additional functionality
 });
-
 
 // add previous journal entry titles to previous entries dropdown
 const prevEntriesList = document.getElementById('prevEntriesList');
@@ -122,3 +129,54 @@ function updateDoneButtonState() {
 // event listeners for input changes
 ideaInput.addEventListener('input', updateDoneButtonState);
 prevEntriesList.addEventListener('change', updateDoneButtonState);
+
+// save entry button enable/disable logic
+const promptInput = document.getElementById('promptInput');
+const entryTitle = document.getElementById('entryTitle');
+const saveEntryBtn = document.getElementById('saveEntryBtn');
+
+function updateSaveButtonState() {
+  const hasPrompt = promptInput.value.trim() !== "";
+  const hasTitle = entryTitle.value.trim() !== "";
+  const hasEntry = journalEntry.value.trim() !== "";
+
+  saveEntryBtn.disabled = !(hasPrompt && hasTitle && hasEntry);
+}
+
+// event listeners for input changes 
+[promptInput, entryTitle, journalEntry].forEach(el =>
+  el.addEventListener('input', updateSaveButtonState)
+);
+
+// saving entry to backend
+function saveEntry() {
+  saveEntryBtn.disabled = true;
+  
+  const data = {
+    prompt: promptInput.value,
+    title: entryTitle.value,
+    content: journalEntry.value
+  };
+
+  fetch("/save_entry", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+    .then(response => response.json())
+    .then(result => {
+      console.log("Server response:", result);
+      // clearing the fields
+      document.getElementById("promptInput").value = "";
+      document.getElementById("entryTitle").value = "";
+      document.getElementById("journalEntry").value = "";
+    })
+    .catch(error => {
+      console.error("Error saving entry:", error);
+    })
+    .finally(() => {
+      updateSaveButtonState(); // enabling button after fetch finished
+    });
+}

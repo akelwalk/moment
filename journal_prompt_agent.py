@@ -8,16 +8,16 @@ from json_repair import repair_json
 
 class JournalPromptAgent(Agent):
     input_format = {"entry": "contents of a previous journal entry"}
-    output_format = {"prompts":["prompt"]}
+    output_format = {"prompt":["prompt"]}
     normal_example = {
     "entry": "Work has been overwhelming lately. I feel like I can't keep up with all the deadlines, and it's making me anxious.",
-    "prompts": [
+    "prompt": [
         "What are the specific parts of work that feel most overwhelming right now?"
     ]
     }
     sensitive_example = {
     "entry": "I feel hopeless. Nothing I do seems to matter, and I don't think I can handle much more of this.",
-    "prompts": [
+    "prompt": [
         "When you've felt this way before, what has helped you get through those difficult moments?"
     ]
     }
@@ -25,7 +25,8 @@ class JournalPromptAgent(Agent):
     1. Use double quotes for all strings and keys.
     2. Do NOT wrap strings in extra single quotes.
     3. Do NOT add trailing commas.
-    4. Do NOT add any text outside the JSON."""
+    4. Do NOT add any text outside the JSON.
+    5. Follow the specified output format."""
 
     prompt = f"""You are an empathetic and knowledgeable reflection companion who is well versed in creating journal prompts for individuals to reflect deeply, navigate inner turmoil, and build resilience to overcome difficult situations, drawing inspiration from approaches such as cognitive behavioral therapy. 
     Given the text of a previous journal entry, create 1 relevant journal prompt that gently encourages the user to delve further into the topics the user had discussed in the entry.
@@ -51,20 +52,16 @@ class JournalPromptAgent(Agent):
         self.product_idea = inputData
         result = super().run(inputData)
         return result
-# # example usage of this class
-# load_dotenv()  # load variables from .env
-# tavily_api_key= os.getenv("TAVILY_API_KEY")
 
-# tools = [TavilySearchResults(max_results = 1, api_key = tavily_api_key)]
 # model = ChatOllama(model="phi4-mini", temperature=1)
-# journal_prompt_agent = JournalPromptAgent(model, tools)
-# result = journal_prompt_agent.run("""entry: "could you give me a prompt about hope" """)
+# journal_prompt_agent = JournalPromptAgent(model, tools=[])
+# result = journal_prompt_agent.run("""entry: """")
 # print(journal_prompt_agent.last_message) #last message's content
 # print("_____________________________________________________________________________")
 # if journal_prompt_agent.last_message != "" and "Error" not in journal_prompt_agent.last_message: # last message could be empty or contain an error
 #     dictionary = json5.loads(journal_prompt_agent.last_message)
 #     print(dictionary)
-#     prompts = dictionary["prompts"]
+#     prompts = dictionary["prompt"]
 #     for i in range(len(prompts)):
 #         prompts[i] = prompts[i].strip("'")
 # else:

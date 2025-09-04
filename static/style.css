@@ -159,6 +159,31 @@ h2 { font-size: 1.2rem; margin-bottom: 10px; color: #000000; }
   margin-top: 5px;
 }
 
+.save-entry-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+#saveEntryBtn {
+  padding: 10px 20px;
+  border: none;
+  background-color: #000;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+#saveEntryBtn:hover:enabled {
+  opacity: 0.8;
+}
+
+#saveEntryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .popup-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -255,7 +280,9 @@ h2 { font-size: 1.2rem; margin-bottom: 10px; color: #000000; }
 
 /* Entries table */
 .entries-container {
-  overflow-x: auto;
+  max-height: 550px; /* can adjust */
+  overflow-y: auto;
+  border: 1px solid #ddd; 
 }
 
 .entries-table {
@@ -273,6 +300,14 @@ h2 { font-size: 1.2rem; margin-bottom: 10px; color: #000000; }
 .entries-table th {
   background-color: #f7f7f7;
   font-weight: 600;
+  background-color: #f7f7f7;
+  font-weight: 600;
+  position: sticky;       
+  top: 0;
+}
+
+.entries-table tr {
+  cursor: pointer;
 }
 
 .entries-table tr:hover {

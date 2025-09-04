@@ -27,7 +27,7 @@
     <!-- search bar -->
     <div class="search-bar-section">
       <div class="search-bar-group">
-        <input type="text" id="searchInput" placeholder="Search your journal entries." />
+        <input type="text" id="searchInput" maxlength="100" placeholder="Search your journal entries." />
         <button id="searchBtn">Search</button>
       </div>
     </div>
@@ -74,7 +74,8 @@
 
       <div class="popup-buttons">
         <button id="popupCloseBtn">Close</button>
-        <button id="popupSaveBtn">Save</button>
+        <button id="popupDeleteBtn">Delete</button>
+        <button id="popupSaveBtn" onclick="saveEntries()">Save</button>
       </div>
     </div>
   </div>

@@ -13,29 +13,28 @@ function navigate(pageName) {
   window.location.href = pageName;
 }
 
-// dummy data simulating DB response
-const entries = [
-  {
-    entry_id: 1,
-    title: "Gratitude Walk",
-    prompt: "Describe one moment today that made you feel truly grateful.",
-    content: "I enjoyed a quiet walk in the park...",
-    date_posted: "2025-09-02",
-    sentiments: "Positive"
-  },
-  {
-    entry_id: 2,
-    title: "Challenging Day",
-    prompt: "Write about a challenge you overcame.",
-    content: "Work was stressful but I managed to push through...",
-    date_posted: "2025-09-01",
-    sentiments: "Mixed"
-  }
-];
+const entriesTableBody = document.getElementById("entriesTableBody");
+let entries = [];
+
+// fetch entries data from fast api
+function fetchEntries() {
+  fetch("/display_entries")
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 200) {
+        entries = data.entries;
+        renderEntries(entries);
+      } else {
+        console.error("Failed to fetch entries:", data);
+      }
+    })
+    .catch(err => console.error("Error fetching entries:", err));
+}
+
+// initial fetch
+fetchEntries();
 
 // populate table with entries
-const entriesTableBody = document.getElementById("entriesTableBody");
-
 function renderEntries(data) {
   entriesTableBody.innerHTML = "";
   data.forEach(entry => {
@@ -45,7 +44,7 @@ function renderEntries(data) {
       <td>${entry.entry_id}</td>
       <td>${entry.title}</td>
       <td>${entry.prompt}</td>
-      <td>${entry.sentiments}</td>
+      <td>${entry.sentiment}</td>
       <td>${entry.date_posted}</td>
     `;
     row.addEventListener("click", () => openEntryPopup(entry));
@@ -53,9 +52,6 @@ function renderEntries(data) {
     entriesTableBody.appendChild(row);
   });
 }
-
-// initial render
-renderEntries(entries);
 
 // search functionality
 const searchInput = document.getElementById("searchInput");
@@ -67,7 +63,7 @@ searchBtn.addEventListener("click", () => {
     e.title.toLowerCase().includes(query) ||
     e.prompt.toLowerCase().includes(query) ||
     e.content.toLowerCase().includes(query) ||
-    e.sentiments.toLowerCase().includes(query)
+    e.sentiment.toLowerCase().includes(query)
   );
   renderEntries(filtered);
 });
@@ -81,6 +77,7 @@ const popupSentiment = document.getElementById("popupSentiment");
 
 const popupCloseBtn = document.getElementById("popupCloseBtn");
 const popupSaveBtn = document.getElementById("popupSaveBtn");
+const popupDeleteBtn = document.getElementById("popupDeleteBtn");
 
 let currentEntry = null;
 
@@ -89,21 +86,44 @@ function openEntryPopup(entry) {
   popupTitle.value = entry.title;
   popupPrompt.value = entry.prompt;
   popupContent.value = entry.content;
-  popupSentiment.value = entry.sentiments;
+  popupSentiment.value = entry.sentiment;
 
   entryPopupOverlay.style.display = "flex";
 }
 
+// close button functionality
 popupCloseBtn.addEventListener("click", () => {
   entryPopupOverlay.style.display = "none";
 });
 
+// close popup when clicking outside of popup-card
+entryPopupOverlay.addEventListener("click", (e) => {
+  if (e.target === entryPopupOverlay) {
+    entryPopupOverlay.style.display = "none";
+  }
+});
+
+// eelete button functionality
+popupDeleteBtn.addEventListener("click", () => {
+  if (currentEntry) {
+    const index = entries.findIndex(e => e.entry_id === currentEntry.entry_id);
+    if (index !== -1) {
+      entries.splice(index, 1); // remove from array
+      renderEntries(entries);
+      currentEntry = null;
+    }
+  }
+  entryPopupOverlay.style.display = "none";
+});
+
+
+// save button functionality
 popupSaveBtn.addEventListener("click", () => {
   if (currentEntry) {
     currentEntry.title = popupTitle.value;
     currentEntry.prompt = popupPrompt.value;
     currentEntry.content = popupContent.value;
-    currentEntry.sentiments = popupSentiment.value;
+    currentEntry.sentiment = popupSentiment.value;
     renderEntries(entries);
   }
   entryPopupOverlay.style.display = "none";
