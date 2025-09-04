@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
       labels: ['Aug 29', 'Aug 30', 'Aug 31', 'Sep 1', 'Sep 2', 'Sep 3', 'Sep 4'],
       datasets: [{
         label: 'Number of Entries',
-        data: [2, 5, 3, 4, 6, 2, 3],
+        data: [2, 0, 1, 1, 4, 2, 0],
         backgroundColor: '#000',
         barThickness: 12
       }]
