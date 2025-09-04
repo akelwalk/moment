@@ -27,7 +27,7 @@ entries = [
     {
         "prompt": "How did you feel when you woke up?",
         "title": "Morning Thoughts",
-        "content": "I woke up feeling surprisingly energized despite staying up late. The sunlight streaming in my window lifted my mood. I decided to go for a short walk.",
+        "content": "I woke up feeling anxious about the day ahead. The mounting tasks made me uneasy, and I had trouble focusing even on simple things.",
         "date_posted": "2025-08-29 07:45:00",
         "sentiment": None,
         "content_embedding": None
@@ -43,7 +43,7 @@ entries = [
     {
         "prompt": "What are you grateful for today?",
         "title": "Gratitude List",
-        "content": "I am grateful for the quiet morning coffee, the sunny weather, and my supportive colleagues. These little things really brighten my day. I want to make sure I notice them more often.",
+        "content": "I felt a wave of love when I saw my family enjoying dinner together. Their laughter and warmth reminded me of the deep connections I cherish.",
         "date_posted": "2025-09-01 08:20:00",
         "sentiment": None,
         "content_embedding": None
@@ -51,7 +51,7 @@ entries = [
     {
         "prompt": "Describe your ideal day",
         "title": "Perfect Day",
-        "content": "I imagined a day with no deadlines, a long hike in the mountains, and a good book by the evening. Everything felt calm and balanced in my mind. I wish I could make this happen more often.",
+        "content": "I imagined a day with endless traffic jams and missed meetings. The thought made me tense and frustrated, realizing how much I rely on things going smoothly.",
         "date_posted": "2025-09-02 10:05:00",
         "sentiment": None,
         "content_embedding": None
@@ -59,7 +59,7 @@ entries = [
     {
         "prompt": "How do you react to stress?",
         "title": "Stressful Moments",
-        "content": "Today was overwhelming at work. I found myself pacing and taking deep breaths to calm down. Eventually, I managed to tackle the tasks one by one.",
+        "content": "I felt scared today when I got an urgent message from work while traveling. My heart raced and I struggled to calm myself before responding.",
         "date_posted": "2025-09-02 12:45:00",
         "sentiment": None,
         "content_embedding": None
@@ -67,7 +67,7 @@ entries = [
     {
         "prompt": "What are your top three values in life?",
         "title": "Core Values",
-        "content": "I value honesty, curiosity, and empathy the most. They guide my decisions and interactions every day. Living by them makes me feel aligned and purposeful.",
+        "content": "I was surprised today when a colleague praised a choice I made that I thought was minor. It made me rethink how my actions are perceived.",
         "date_posted": "2025-09-02 15:30:00",
         "sentiment": None,
         "content_embedding": None
@@ -75,7 +75,7 @@ entries = [
     {
         "prompt": "Describe a recent situation that made you happy",
         "title": "Small Joys",
-        "content": "A stranger complimented my work today, which was unexpected but uplifting. It reminded me that small gestures can make a big difference. I ended the day with a smile.",
+        "content": "I felt pure joy when I saw my favorite band perform live, a moment I had been waiting for months. The energy in the crowd was contagious.",
         "date_posted": "2025-09-02 18:10:00",
         "sentiment": None,
         "content_embedding": None
